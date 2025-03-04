@@ -1,23 +1,22 @@
-# Build Stage
-FROM rust:latest AS builder
+FROM debian:bookworm AS builder  # More recent GLIBC version
+
+RUN apt update && apt install -y curl build-essential
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /usr/src/app
+
 COPY . .
 
 RUN cargo build --release
 
-RUN ls -l /usr/src/app/target/release/
-
-
-# Runtime Stage
-FROM debian:buster-slim
+# Final Stage: Create a smaller runtime image
+FROM debian:bookworm  # Same base image
 
 WORKDIR /usr/local/bin
 
-# Copy only the compiled binary
 COPY --from=builder /usr/src/app/target/release/myapp .
 
-# Ensure the binary is executable
-RUN chmod +x /usr/local/bin/myapp
-
-CMD ["/usr/local/bin/myapp"]
+CMD ["./myapp"]
