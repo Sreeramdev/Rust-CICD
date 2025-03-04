@@ -6,6 +6,9 @@ COPY . .
 
 RUN cargo build --release
 
+RUN ls -l /usr/src/app/target/release/
+
+
 # Runtime Stage
 FROM debian:buster-slim
 
