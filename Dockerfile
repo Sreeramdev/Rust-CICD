@@ -1,22 +1,19 @@
-FROM debian:bookworm AS builder  # More recent GLIBC version
-
-RUN apt update && apt install -y curl build-essential
-
-# Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+FROM rust:latest AS builder
 
 WORKDIR /usr/src/app
 
+# Install musl target
+RUN rustup target add x86_64-unknown-linux-musl
+
 COPY . .
 
-RUN cargo build --release
+# Build the Rust application statically
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# Final Stage: Create a smaller runtime image
-FROM debian:bookworm  # Same base image
+FROM alpine:latest  # Smallest runtime image
 
 WORKDIR /usr/local/bin
 
-COPY --from=builder /usr/src/app/target/release/myapp .
+COPY --from=builder /usr/src/app/target/x86_64-unknown-linux-musl/release/myapp .
 
 CMD ["./myapp"]
