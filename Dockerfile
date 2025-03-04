@@ -1,15 +1,14 @@
-# First stage: Build Rust app
-FROM rust:1.75 AS builder
+# Use the Rust base image
+FROM rust:1.75
 
+# Set the working directory
 WORKDIR /usr/src/app
+
+# Copy the application source code
 COPY . .
+
+# Build the Rust application
 RUN cargo build --release
 
-# Second stage: Create a minimal runtime image
-FROM debian:buster-slim
-
-WORKDIR /usr/local/bin
-COPY --from=builder /usr/src/app/target/release/rust-docker-app .
-
-CMD ["./rust-docker-app"]
-
+# Set the entry point
+CMD ["./target/release/myapp"]
