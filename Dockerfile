@@ -1,14 +1,20 @@
-# Use the Rust base image
-FROM rust:latest
+# Build Stage
+FROM rust:1.75 AS builder
 
-# Set the working directory
 WORKDIR /usr/src/app
-
-# Copy the application source code
 COPY . .
 
-# Build the Rust application
 RUN cargo build --release
 
-# Set the entry point
-CMD ["./target/release/myapp"]
+# Runtime Stage
+FROM debian:buster-slim
+
+WORKDIR /usr/local/bin
+
+# Copy only the compiled binary
+COPY --from=builder /usr/src/app/target/release/myapp .
+
+# Ensure the binary is executable
+RUN chmod +x /usr/local/bin/myapp
+
+CMD ["/usr/local/bin/myapp"]
