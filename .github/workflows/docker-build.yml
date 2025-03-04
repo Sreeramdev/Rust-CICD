@@ -33,9 +33,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
 
     steps:
       - name: Pull and Run Docker Container
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/rust-docker-app:latest
-          docker run -d --name rust-container -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/rust-docker-app
+          docker run -d --name rust-container -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/rust-docker-app:latest
