@@ -1,19 +1,15 @@
-FROM rust:latest AS builder
+# Use the Rust base image
+FROM rust:latest
 
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Install musl target
-RUN rustup target add x86_64-unknown-linux-musl
-
+# Copy the application source code
 COPY . .
 
-# Build the Rust application statically
-RUN cargo build --release --target x86_64-unknown-linux-musl
-
-FROM alpine:latest  # Smallest runtime image
-
-WORKDIR /usr/local/bin
-
-COPY --from=builder /usr/src/app/target/x86_64-unknown-linux-musl/release/myapp .
-
-CMD ["./myapp"]
+# Build the Rust application
+RUN cargo build --release
+RUN echo "Application built successfully" && \
+    echo "Application running..."
+# Set the entry point
+CMD ["./target/release/myapp"]
