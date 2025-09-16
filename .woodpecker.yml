@@ -22,4 +22,4 @@ steps:
     commands:
       - docker pull sreeramdev/rust-docker-app:latest
       - docker rm -f rust-container || true
-      - docker run -d --name rust-container -p 8080:8080 sreeramdev/rust-docker-app:latest
+      - docker run -d --name rust-container -p 2237:8080 sreeramdev/rust-docker-app:latest
