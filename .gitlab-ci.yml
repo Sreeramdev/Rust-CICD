@@ -1,0 +1,32 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_TAG: sreeramdev/rust-docker-app:latest
+
+before_script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+build:
+  stage: build
+  image: docker:25.0.1
+  services:
+    - docker:dind
+  script:
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  image: docker:25.0.1
+  services:
+    - docker:dind
+  script:
+    - docker pull $IMAGE_TAG
+    - docker run -d --name rust-container -p 8080:8080 $IMAGE_TAG
+  only:
+    - main
