@@ -1,5 +1,5 @@
-pipeline:
-  build:
+steps:
+  - name: build
     image: docker:24.0.5-dind
     privileged: true
     environment:
@@ -12,11 +12,9 @@ pipeline:
       - docker buildx create --use
       - docker buildx build --push --platform linux/amd64,linux/arm64 -t sreeramdev/rust-docker-app:latest -f Dockerfile .
 
-  deploy:
+  - name: deploy
     image: docker:24.0.5
     privileged: true
-    depends_on:
-      - build
     commands:
       - docker pull sreeramdev/rust-docker-app:latest
       - docker rm -f rust-container || true
