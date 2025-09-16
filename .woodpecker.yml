@@ -1,0 +1,23 @@
+pipeline:
+  build:
+    image: docker:24.0.5-dind
+    privileged: true
+    environment:
+      DOCKER_USERNAME:
+        from_secret: DOCKER_USERNAME
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - docker buildx create --use
+      - docker buildx build --push --platform linux/amd64,linux/arm64 -t sreeramdev/rust-docker-app:latest -f Dockerfile .
+
+  deploy:
+    image: docker:24.0.5
+    privileged: true
+    depends_on:
+      - build
+    commands:
+      - docker pull sreeramdev/rust-docker-app:latest
+      - docker rm -f rust-container || true
+      - docker run -d --name rust-container -p 8080:8080 sreeramdev/rust-docker-app:latest
